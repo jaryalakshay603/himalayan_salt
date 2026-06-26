@@ -4,6 +4,9 @@ import {
   Check,
   ChevronRight,
   IndianRupee,
+  Instagram,
+  Mail,
+  MessageCircle,
   Minus,
   PackageCheck,
   Plus,
@@ -26,6 +29,13 @@ const PRODUCT = {
   image: "/images/himachali-green-salt-hero.png",
 };
 
+const STORE_CONTACT = {
+  email: "jaryalakshay603@gmail.com",
+  whatsappNumber: "918559023422",
+  displayPhone: "+91 85590 23422",
+  instagramUrl: "https://www.instagram.com/p/DaBH0oHhrGC/?igsh=MTlsbTY0bXBjNWVmYw==",
+};
+
 const initialCheckout = {
   name: "",
   phone: "",
@@ -44,12 +54,29 @@ function formatCurrency(value) {
   }).format(value);
 }
 
+function buildOwnerNotification(order) {
+  return [
+    "New Himachali Green Salt order",
+    "",
+    order.orderDetails,
+    "",
+    `Customer: ${order.name}`,
+    `Phone: ${order.phone}`,
+    `Email: ${order.email || "Not provided"}`,
+    `Address: ${order.address}`,
+    `City: ${order.city}`,
+    `Pincode: ${order.pincode}`,
+    `Notes: ${order.notes || "None"}`,
+  ].join("\n");
+}
+
 function App() {
   const [quantity, setQuantity] = useState(() => {
     const saved = Number(localStorage.getItem("salt-store-qty"));
     return Number.isFinite(saved) && saved > 0 ? saved : 1;
   });
   const [checkout, setCheckout] = useState(initialCheckout);
+  const [lastOrder, setLastOrder] = useState(null);
   const [status, setStatus] = useState("idle");
 
   const subtotal = PRODUCT.price * quantity;
@@ -63,6 +90,18 @@ function App() {
       )}\nDelivery: ${formatCurrency(delivery)}\nTotal: ${formatCurrency(total)}`,
     [delivery, quantity, subtotal, total]
   );
+  const ownerNotification = useMemo(
+    () => (lastOrder ? buildOwnerNotification(lastOrder) : ""),
+    [lastOrder]
+  );
+  const whatsappUrl = ownerNotification
+    ? `https://wa.me/${STORE_CONTACT.whatsappNumber}?text=${encodeURIComponent(ownerNotification)}`
+    : "";
+  const emailUrl = ownerNotification
+    ? `mailto:${STORE_CONTACT.email}?subject=${encodeURIComponent(
+        "New Himachali Green Salt order"
+      )}&body=${encodeURIComponent(ownerNotification)}`
+    : "";
 
   useEffect(() => {
     localStorage.setItem("salt-store-qty", String(quantity));
@@ -83,14 +122,27 @@ function App() {
     formData.append("quantity", String(quantity));
     formData.append("total", formatCurrency(total));
     formData.append("order_details", orderDetails);
+    formData.append("store_email", STORE_CONTACT.email);
+    formData.append("store_whatsapp", STORE_CONTACT.displayPhone);
+
+    const submittedOrder = {
+      ...checkout,
+      quantity,
+      total: formatCurrency(total),
+      orderDetails,
+    };
 
     try {
-      await fetch("/", {
+      const response = await fetch("/", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams(formData).toString(),
       });
+      if (!response.ok) {
+        throw new Error("Order submission failed");
+      }
       setStatus("success");
+      setLastOrder(submittedOrder);
       setCheckout(initialCheckout);
     } catch (error) {
       setStatus("error");
@@ -129,6 +181,15 @@ function App() {
               Order now <ChevronRight size={18} />
             </a>
             <a className="secondary-button" href="#product">View details</a>
+            <a
+              className="secondary-button"
+              href={STORE_CONTACT.instagramUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Instagram size={18} />
+              Instagram reference
+            </a>
           </div>
         </div>
       </section>
@@ -189,7 +250,12 @@ function App() {
           <h2>Place your order</h2>
           <p>
             Fill delivery details and submit. On Netlify, each order will appear
-            in your site dashboard under Forms.
+            in your site dashboard under Forms, and an automatic email notification
+            can be sent to{" "}
+            <a className="inline-link" href={`mailto:${STORE_CONTACT.email}`}>
+              {STORE_CONTACT.email}
+            </a>
+            .
           </p>
 
           <div className="order-summary">
@@ -208,8 +274,16 @@ function App() {
           </div>
         </div>
 
-        <form className="checkout-form" name="salt-orders" method="POST" onSubmit={submitOrder}>
+        <form
+          className="checkout-form"
+          name="salt-orders"
+          method="POST"
+          data-netlify="true"
+          netlify-honeypot="bot-field"
+          onSubmit={submitOrder}
+        >
           <input type="hidden" name="form-name" value="salt-orders" />
+          <input type="hidden" name="bot-field" />
           <label>
             Full name
             <input name="name" value={checkout.name} onChange={updateCheckout} required />
@@ -243,12 +317,26 @@ function App() {
           <input type="hidden" name="quantity" value={quantity} />
           <input type="hidden" name="total" value={formatCurrency(total)} />
           <input type="hidden" name="order_details" value={orderDetails} />
+          <input type="hidden" name="store_email" value={STORE_CONTACT.email} />
+          <input type="hidden" name="store_whatsapp" value={STORE_CONTACT.displayPhone} />
           <button className="primary-button full" type="submit" disabled={status === "submitting"}>
             <IndianRupee size={18} />
             {status === "submitting" ? "Submitting..." : "Submit order"}
           </button>
           {status === "success" && (
-            <p className="form-status success">Order received. We will contact you to confirm delivery.</p>
+            <div className="form-status success">
+              <p>Order received. We will contact you to confirm delivery.</p>
+              <div className="notification-actions" aria-label="Owner notification actions">
+                <a href={whatsappUrl} target="_blank" rel="noreferrer">
+                  <MessageCircle size={17} />
+                  Send on WhatsApp
+                </a>
+                <a href={emailUrl}>
+                  <Mail size={17} />
+                  Send email
+                </a>
+              </div>
+            </div>
           )}
           {status === "error" && (
             <p className="form-status error">Order could not be submitted. Please try again.</p>
@@ -258,7 +346,11 @@ function App() {
 
       <footer>
         <span>Himachali Salt Store</span>
-        <span>Online orders for Himachali green salt</span>
+        <span>
+          <a href={`mailto:${STORE_CONTACT.email}`}>{STORE_CONTACT.email}</a> |{" "}
+          <a href={`https://wa.me/${STORE_CONTACT.whatsappNumber}`}>{STORE_CONTACT.displayPhone}</a> |{" "}
+          <a href={STORE_CONTACT.instagramUrl} target="_blank" rel="noreferrer">Instagram</a>
+        </span>
       </footer>
     </main>
   );

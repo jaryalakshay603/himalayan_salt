@@ -24,6 +24,13 @@ a {
   text-decoration: none;
 }
 
+.inline-link {
+  color: #2f6f46;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 button,
 input,
 textarea {
@@ -414,9 +421,35 @@ textarea {
   padding: 12px;
 }
 
+.form-status p {
+  color: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
 .success {
   background: #e3f6ed;
   color: #17694e;
+}
+
+.notification-actions {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 12px;
+}
+
+.notification-actions a {
+  align-items: center;
+  background: white;
+  border: 1px solid rgba(23, 105, 78, 0.18);
+  border-radius: 6px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  min-height: 42px;
+  padding: 8px 10px;
 }
 
 .error {
@@ -435,6 +468,10 @@ footer {
 
 footer span:last-child {
   color: rgba(255, 255, 255, 0.7);
+}
+
+footer a {
+  color: inherit;
 }
 
 @media (max-width: 850px) {
@@ -485,6 +522,7 @@ footer span:last-child {
   }
 
   .form-grid,
+  .notification-actions,
   footer {
     grid-template-columns: 1fr;
   }
