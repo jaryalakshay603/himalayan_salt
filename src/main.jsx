@@ -84,6 +84,7 @@ function App() {
   const [checkout, setCheckout] = useState(initialCheckout);
   const [lastOrder, setLastOrder] = useState(null);
   const [status, setStatus] = useState("idle");
+  const [statusMessage, setStatusMessage] = useState("");
 
   const selectedPackSize =
     PRODUCT.packSizes.find((packSize) => packSize.id === packSizeId) || PRODUCT.packSizes[2];
@@ -127,16 +128,7 @@ function App() {
   const submitOrder = async (event) => {
     event.preventDefault();
     setStatus("submitting");
-
-    const formData = new FormData();
-    formData.append("form-name", "salt-orders");
-    Object.entries(checkout).forEach(([key, value]) => formData.append(key, value));
-    formData.append("quantity", String(quantity));
-    formData.append("pack_size", selectedPackSize.label);
-    formData.append("total", formatCurrency(total));
-    formData.append("order_details", orderDetails);
-    formData.append("store_email", STORE_CONTACT.email);
-    formData.append("store_whatsapp", STORE_CONTACT.displayPhone);
+    setStatusMessage("");
 
     const submittedOrder = {
       ...checkout,
@@ -147,19 +139,24 @@ function App() {
     };
 
     try {
-      const response = await fetch("/", {
+      const response = await fetch("/.netlify/functions/send-order-email", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(formData).toString(),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(submittedOrder),
       });
+
       if (!response.ok) {
-        throw new Error("Order submission failed");
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result.error || "Order submission failed");
       }
+
       setStatus("success");
+      setStatusMessage("Order received. We will contact you to confirm delivery.");
       setLastOrder(submittedOrder);
       setCheckout(initialCheckout);
     } catch (error) {
       setStatus("error");
+      setStatusMessage(error.message || "Order could not be submitted. Please try again.");
     }
   };
 
@@ -345,7 +342,7 @@ function App() {
           </button>
           {status === "success" && (
             <div className="form-status success">
-              <p>Order received. We will contact you to confirm delivery.</p>
+              <p>{statusMessage}</p>
               <div className="notification-actions" aria-label="Owner notification actions">
                 <a href={whatsappUrl} target="_blank" rel="noreferrer">
                   <MessageCircle size={17} />
@@ -359,7 +356,7 @@ function App() {
             </div>
           )}
           {status === "error" && (
-            <p className="form-status error">Order could not be submitted. Please try again.</p>
+            <p className="form-status error">{statusMessage}</p>
           )}
         </form>
       </section>
