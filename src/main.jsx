@@ -18,15 +18,17 @@ import {
 import "./styles.css";
 
 const PRODUCT = {
-  id: "himachali-green-salt-1kg",
+  id: "himachali-green-salt",
   name: "Himachali Green Salt",
-  size: "1 kg pack",
-  price: 249,
-  mrp: 299,
+  packSizes: [
+    { id: "200g", label: "200 gram", price: 100, mrp: 120 },
+    { id: "500g", label: "500 gram", price: 180, mrp: 200 },
+    { id: "1kg", label: "1 kg", price: 249, mrp: 299 },
+  ],
   rating: "4.8",
   deliveryFee: 40,
   freeDeliveryAt: 999,
-  image: "/images/himachali-green-salt-hero.png",
+  image: "/images/pahadi-namak-hero.png",
 };
 
 const STORE_CONTACT = {
@@ -75,20 +77,26 @@ function App() {
     const saved = Number(localStorage.getItem("salt-store-qty"));
     return Number.isFinite(saved) && saved > 0 ? saved : 1;
   });
+  const [packSizeId, setPackSizeId] = useState(() => {
+    const saved = localStorage.getItem("salt-store-pack-size");
+    return PRODUCT.packSizes.some((packSize) => packSize.id === saved) ? saved : "1kg";
+  });
   const [checkout, setCheckout] = useState(initialCheckout);
   const [lastOrder, setLastOrder] = useState(null);
   const [status, setStatus] = useState("idle");
 
-  const subtotal = PRODUCT.price * quantity;
+  const selectedPackSize =
+    PRODUCT.packSizes.find((packSize) => packSize.id === packSizeId) || PRODUCT.packSizes[2];
+  const subtotal = selectedPackSize.price * quantity;
   const delivery = subtotal >= PRODUCT.freeDeliveryAt ? 0 : PRODUCT.deliveryFee;
   const total = subtotal + delivery;
 
   const orderDetails = useMemo(
     () =>
-      `${PRODUCT.name} (${PRODUCT.size}) x ${quantity}\nSubtotal: ${formatCurrency(
+      `${PRODUCT.name} (${selectedPackSize.label}) x ${quantity}\nSubtotal: ${formatCurrency(
         subtotal
       )}\nDelivery: ${formatCurrency(delivery)}\nTotal: ${formatCurrency(total)}`,
-    [delivery, quantity, subtotal, total]
+    [delivery, quantity, selectedPackSize.label, subtotal, total]
   );
   const ownerNotification = useMemo(
     () => (lastOrder ? buildOwnerNotification(lastOrder) : ""),
@@ -107,6 +115,10 @@ function App() {
     localStorage.setItem("salt-store-qty", String(quantity));
   }, [quantity]);
 
+  useEffect(() => {
+    localStorage.setItem("salt-store-pack-size", packSizeId);
+  }, [packSizeId]);
+
   const updateCheckout = (event) => {
     const { name, value } = event.target;
     setCheckout((current) => ({ ...current, [name]: value }));
@@ -120,6 +132,7 @@ function App() {
     formData.append("form-name", "salt-orders");
     Object.entries(checkout).forEach(([key, value]) => formData.append(key, value));
     formData.append("quantity", String(quantity));
+    formData.append("pack_size", selectedPackSize.label);
     formData.append("total", formatCurrency(total));
     formData.append("order_details", orderDetails);
     formData.append("store_email", STORE_CONTACT.email);
@@ -128,6 +141,7 @@ function App() {
     const submittedOrder = {
       ...checkout,
       quantity,
+      packSize: selectedPackSize.label,
       total: formatCurrency(total),
       orderDetails,
     };
@@ -211,7 +225,7 @@ function App() {
           </p>
           <ul className="check-list">
             <li><Check size={18} /> Traditional green salt seasoning</li>
-            <li><Check size={18} /> Resealable 1 kg pack</li>
+            <li><Check size={18} /> Choose 200 gram, 500 gram, or 1 kg packs</li>
             <li><Check size={18} /> Cash-on-delivery friendly order flow</li>
           </ul>
         </div>
@@ -220,12 +234,17 @@ function App() {
           <div>
             <p className="rating">{PRODUCT.rating} customer rating</p>
             <h3>{PRODUCT.name}</h3>
-            <p>{PRODUCT.size}</p>
+            <p>{selectedPackSize.label} pack</p>
           </div>
           <div className="price-row">
-            <strong>{formatCurrency(PRODUCT.price)}</strong>
-            <span>{formatCurrency(PRODUCT.mrp)}</span>
+            <strong>{formatCurrency(selectedPackSize.price)}</strong>
+            <span>{formatCurrency(selectedPackSize.mrp)}</span>
           </div>
+          <PackSizePicker
+            packSizes={PRODUCT.packSizes}
+            selectedPackSize={packSizeId}
+            setPackSize={setPackSizeId}
+          />
           <QuantityPicker quantity={quantity} setQuantity={setQuantity} />
           <a className="primary-button full" href="#checkout">
             <ShoppingBag size={18} />
@@ -260,8 +279,8 @@ function App() {
 
           <div className="order-summary">
             <div>
-              <span>{PRODUCT.name}</span>
-              <strong>{quantity} x {formatCurrency(PRODUCT.price)}</strong>
+              <span>{PRODUCT.name} ({selectedPackSize.label})</span>
+              <strong>{quantity} x {formatCurrency(selectedPackSize.price)}</strong>
             </div>
             <div>
               <span>Delivery</span>
@@ -315,6 +334,7 @@ function App() {
             <textarea name="notes" value={checkout.notes} onChange={updateCheckout} />
           </label>
           <input type="hidden" name="quantity" value={quantity} />
+          <input type="hidden" name="pack_size" value={selectedPackSize.label} />
           <input type="hidden" name="total" value={formatCurrency(total)} />
           <input type="hidden" name="order_details" value={orderDetails} />
           <input type="hidden" name="store_email" value={STORE_CONTACT.email} />
@@ -388,6 +408,25 @@ function QuantityPicker({ quantity, setQuantity }) {
       <button type="button" onClick={() => setQuantity((value) => value + 1)} aria-label="Increase quantity">
         <Plus size={18} />
       </button>
+    </div>
+  );
+}
+
+function PackSizePicker({ packSizes, selectedPackSize, setPackSize }) {
+  return (
+    <div className="pack-size-picker" aria-label="Select pack size">
+      {packSizes.map((packSize) => (
+        <button
+          className={packSize.id === selectedPackSize ? "active" : ""}
+          key={packSize.id}
+          type="button"
+          onClick={() => setPackSize(packSize.id)}
+          aria-pressed={packSize.id === selectedPackSize}
+        >
+          <span>{packSize.label}</span>
+          <strong>{formatCurrency(packSize.price)}</strong>
+        </button>
+      ))}
     </div>
   );
 }

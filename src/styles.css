@@ -167,6 +167,7 @@ p {
 .hero-actions,
 .price-row,
 .quantity-row,
+.pack-size-picker,
 .primary-button,
 .secondary-button {
   align-items: center;
@@ -327,6 +328,44 @@ p {
   align-self: center;
   font-weight: 900;
   justify-self: center;
+}
+
+.pack-size-picker {
+  background: #f3efe8;
+  border-radius: 6px;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 6px;
+}
+
+.pack-size-picker button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: #203029;
+  cursor: pointer;
+  display: grid;
+  gap: 3px;
+  min-height: 58px;
+  padding: 8px 6px;
+  text-align: center;
+}
+
+.pack-size-picker button.active {
+  background: white;
+  border-color: rgba(63, 127, 85, 0.36);
+  box-shadow: 0 8px 18px rgba(32, 48, 41, 0.08);
+}
+
+.pack-size-picker span {
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+
+.pack-size-picker strong {
+  color: #2f6f46;
+  font-size: 0.9rem;
 }
 
 .benefits {
