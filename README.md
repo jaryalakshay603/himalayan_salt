@@ -51,7 +51,7 @@ Netlify is the easiest free option for this version because it can also collect 
 The checkout sends each order to `/.netlify/functions/send-order-email`, which uses Gmail SMTP through Nodemailer. The order also includes owner contact actions for:
 
 - WhatsApp: `+91 85590 23422`
-- Email: `jaryalakshay603@gmail.com`
+- Email: configured privately with `ORDER_RECEIVER_EMAIL` in Netlify
 - Instagram reference: <https://www.instagram.com/p/DaBH0oHhrGC/?igsh=MTlsbTY0bXBjNWVmYw==>
 
 After a customer submits an order, the site shows prefilled **Send on WhatsApp** and **Send email** actions. Fully automatic WhatsApp notifications require a service such as WhatsApp Business API, Zapier, Make, or a small backend.

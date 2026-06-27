@@ -5,7 +5,6 @@ import {
   ChevronRight,
   IndianRupee,
   Instagram,
-  Mail,
   MessageCircle,
   Minus,
   PackageCheck,
@@ -32,7 +31,6 @@ const PRODUCT = {
 };
 
 const STORE_CONTACT = {
-  email: "jaryalakshay603@gmail.com",
   whatsappNumber: "918559023422",
   displayPhone: "+91 85590 23422",
   instagramUrl: "https://www.instagram.com/p/DaBH0oHhrGC/?igsh=MTlsbTY0bXBjNWVmYw==",
@@ -105,11 +103,6 @@ function App() {
   );
   const whatsappUrl = ownerNotification
     ? `https://wa.me/${STORE_CONTACT.whatsappNumber}?text=${encodeURIComponent(ownerNotification)}`
-    : "";
-  const emailUrl = ownerNotification
-    ? `mailto:${STORE_CONTACT.email}?subject=${encodeURIComponent(
-        "New Himachali Green Salt order"
-      )}&body=${encodeURIComponent(ownerNotification)}`
     : "";
 
   useEffect(() => {
@@ -267,11 +260,7 @@ function App() {
           <p>
             Fill delivery details and submit. On Netlify, each order will appear
             in your site dashboard under Forms, and an automatic email notification
-            can be sent to{" "}
-            <a className="inline-link" href={`mailto:${STORE_CONTACT.email}`}>
-              {STORE_CONTACT.email}
-            </a>
-            .
+            can be sent to the private receiver address configured in Netlify.
           </p>
 
           <div className="order-summary">
@@ -334,7 +323,6 @@ function App() {
           <input type="hidden" name="pack_size" value={selectedPackSize.label} />
           <input type="hidden" name="total" value={formatCurrency(total)} />
           <input type="hidden" name="order_details" value={orderDetails} />
-          <input type="hidden" name="store_email" value={STORE_CONTACT.email} />
           <input type="hidden" name="store_whatsapp" value={STORE_CONTACT.displayPhone} />
           <button className="primary-button full" type="submit" disabled={status === "submitting"}>
             <IndianRupee size={18} />
@@ -348,10 +336,6 @@ function App() {
                   <MessageCircle size={17} />
                   Send on WhatsApp
                 </a>
-                <a href={emailUrl}>
-                  <Mail size={17} />
-                  Send email
-                </a>
               </div>
             </div>
           )}
@@ -364,7 +348,6 @@ function App() {
       <footer>
         <span>Himachali Salt Store</span>
         <span>
-          <a href={`mailto:${STORE_CONTACT.email}`}>{STORE_CONTACT.email}</a> |{" "}
           <a href={`https://wa.me/${STORE_CONTACT.whatsappNumber}`}>{STORE_CONTACT.displayPhone}</a> |{" "}
           <a href={STORE_CONTACT.instagramUrl} target="_blank" rel="noreferrer">Instagram</a>
         </span>
