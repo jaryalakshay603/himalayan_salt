@@ -20,12 +20,11 @@ const PRODUCT = {
   id: "himachali-green-salt",
   name: "Himachali Green Salt",
   packSizes: [
-    { id: "200g", label: "200 gram", price: 100, mrp: 120 },
-    { id: "500g", label: "500 gram", price: 180, mrp: 200 },
-    { id: "1kg", label: "1 kg", price: 249, mrp: 299 },
+    { id: "200g", label: "200 gram", price: 120, mrp: 150 },
+    { id: "500g", label: "500 gram", price: 220, mrp: 200 }
   ],
-  rating: "4.8",
-  deliveryFee: 40,
+  rating: "4.9",
+  deliveryFee: 60,
   freeDeliveryAt: 999,
   image: "/images/pahadi-namak-hero.png",
 };
@@ -77,7 +76,9 @@ function App() {
   });
   const [packSizeId, setPackSizeId] = useState(() => {
     const saved = localStorage.getItem("salt-store-pack-size");
-    return PRODUCT.packSizes.some((packSize) => packSize.id === saved) ? saved : "1kg";
+    return PRODUCT.packSizes.some((packSize) => packSize.id === saved)
+      ? saved
+      : PRODUCT.packSizes[0].id;
   });
   const [checkout, setCheckout] = useState(initialCheckout);
   const [lastOrder, setLastOrder] = useState(null);
@@ -85,7 +86,7 @@ function App() {
   const [statusMessage, setStatusMessage] = useState("");
 
   const selectedPackSize =
-    PRODUCT.packSizes.find((packSize) => packSize.id === packSizeId) || PRODUCT.packSizes[2];
+    PRODUCT.packSizes.find((packSize) => packSize.id === packSizeId) || PRODUCT.packSizes[0];
   const subtotal = selectedPackSize.price * quantity;
   const delivery = subtotal >= PRODUCT.freeDeliveryAt ? 0 : PRODUCT.deliveryFee;
   const total = subtotal + delivery;
@@ -138,13 +139,18 @@ function App() {
         body: JSON.stringify(submittedOrder),
       });
 
+      const result = await response.json().catch(() => ({}));
+
       if (!response.ok) {
-        const result = await response.json().catch(() => ({}));
         throw new Error(result.error || "Order submission failed");
       }
 
       setStatus("success");
-      setStatusMessage("Order received. We will contact you to confirm delivery.");
+      setStatusMessage(
+        result.whatsapp?.sent
+          ? "Order received. We will contact you to confirm delivery."
+          : "Order received. WhatsApp auto-notification needs setup or failed, so use the WhatsApp fallback below."
+      );
       setLastOrder(submittedOrder);
       setCheckout(initialCheckout);
     } catch (error) {
@@ -258,9 +264,9 @@ function App() {
           <p className="eyebrow">Checkout</p>
           <h2>Place your order</h2>
           <p>
-            Fill delivery details and submit. On Netlify, each order will appear
-            in your site dashboard under Forms, and an automatic email notification
-            can be sent to the private receiver address configured in Netlify.
+            Fill delivery details and submit. Each order sends an email notification
+            and can automatically notify the store owner on WhatsApp after the
+            WhatsApp Business API details are added in Netlify.
           </p>
 
           <div className="order-summary">

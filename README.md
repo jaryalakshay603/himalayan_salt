@@ -8,7 +8,8 @@ A React + Vite ecommerce starter for selling one Himachali green salt product on
 - Quantity selector and cart summary
 - Checkout form
 - SMTP email notifications through a Netlify Function
-- Owner contact links for WhatsApp and email fallback
+- Automatic owner WhatsApp notifications through WhatsApp Cloud API
+- Owner contact links for WhatsApp fallback
 - Instagram reference link
 - Responsive mobile layout
 - Free static hosting deployment setup
@@ -44,17 +45,31 @@ Netlify is the easiest free option for this version because it can also collect 
    - `EMAIL_USER`: your Gmail address
    - `EMAIL_APP_PASSWORD`: your Gmail app password, without spaces
    - `ORDER_RECEIVER_EMAIL`: the address that should receive order emails
+   - `WHATSAPP_ACCESS_TOKEN`: Meta WhatsApp Cloud API access token
+   - `WHATSAPP_PHONE_NUMBER_ID`: WhatsApp Business phone number ID from Meta
+   - `ORDER_WHATSAPP_TO`: `918559023422`
+   - `WHATSAPP_API_VERSION`: optional Graph API version, defaults to `v20.0`
 8. Redeploy the site after saving environment variables.
 
 ## Order Notifications
 
-The checkout sends each order to `/.netlify/functions/send-order-email`, which uses Gmail SMTP through Nodemailer. The order also includes owner contact actions for:
+The checkout sends each order to `/.netlify/functions/send-order-email`, which uses Gmail SMTP through Nodemailer. After the email is sent, the same function also tries to send the order details automatically to WhatsApp number `+91 85590 23422` through Meta WhatsApp Cloud API.
 
 - WhatsApp: `+91 85590 23422`
 - Email: configured privately with `ORDER_RECEIVER_EMAIL` in Netlify
 - Instagram reference: <https://www.instagram.com/p/DaBH0oHhrGC/?igsh=MTlsbTY0bXBjNWVmYw==>
 
-After a customer submits an order, the site shows prefilled **Send on WhatsApp** and **Send email** actions. Fully automatic WhatsApp notifications require a service such as WhatsApp Business API, Zapier, Make, or a small backend.
+If WhatsApp credentials are missing or Meta rejects the message, the order still succeeds by email and the site shows a prefilled **Send on WhatsApp** fallback link.
+
+WhatsApp API access needed:
+
+- A Meta Business account.
+- A WhatsApp Business app in Meta for Developers.
+- A WhatsApp Business phone number connected to the app.
+- The app's `WHATSAPP_PHONE_NUMBER_ID`.
+- A permanent or long-lived `WHATSAPP_ACCESS_TOKEN` with permission to send WhatsApp messages.
+- The receiver number `+91 85590 23422` added/allowed according to your WhatsApp app setup.
+- If Meta requires a template for this notification, an approved message template for new order alerts.
 
 For local SMTP testing, use Netlify CLI (`netlify dev`) so the serverless function is available. Plain `npm run dev` only starts Vite and will not run Netlify Functions.
 

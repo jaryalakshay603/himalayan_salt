@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 
 const requiredFields = ["name", "phone", "address", "city", "pincode", "orderDetails"];
+const DEFAULT_WHATSAPP_TO = "918559023422";
 
 function json(statusCode, body) {
   return {
@@ -35,6 +36,10 @@ function buildEmailText(order) {
   ].join("\n");
 }
 
+function buildWhatsAppText(order) {
+  return buildEmailText(order);
+}
+
 function buildEmailHtml(order) {
   const rows = [
     ["Customer", order.name],
@@ -65,6 +70,47 @@ function buildEmailHtml(order) {
       </table>
     </div>
   `;
+}
+
+async function sendWhatsAppNotification(order) {
+  const {
+    WHATSAPP_ACCESS_TOKEN,
+    WHATSAPP_PHONE_NUMBER_ID,
+    WHATSAPP_API_VERSION = "v20.0",
+    ORDER_WHATSAPP_TO = DEFAULT_WHATSAPP_TO,
+  } = process.env;
+
+  if (!WHATSAPP_ACCESS_TOKEN || !WHATSAPP_PHONE_NUMBER_ID) {
+    return { configured: false, sent: false };
+  }
+
+  const response = await fetch(
+    `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${WHATSAPP_PHONE_NUMBER_ID}/messages`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to: ORDER_WHATSAPP_TO,
+        type: "text",
+        text: {
+          preview_url: false,
+          body: buildWhatsAppText(order),
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`WhatsApp send failed: ${response.status} ${details}`);
+  }
+
+  return { configured: true, sent: true };
 }
 
 export const handler = async (event) => {
@@ -111,7 +157,20 @@ export const handler = async (event) => {
       html: buildEmailHtml(order),
     });
 
-    return json(200, { ok: true });
+    try {
+      const whatsapp = await sendWhatsAppNotification(order);
+      return json(200, { ok: true, whatsapp });
+    } catch (error) {
+      console.error("WhatsApp send failed", error);
+      return json(200, {
+        ok: true,
+        whatsapp: {
+          configured: true,
+          sent: false,
+          error: "WhatsApp notification failed. Check the function logs for the provider response.",
+        },
+      });
+    }
   } catch (error) {
     console.error("SMTP send failed", error);
     return json(502, {
