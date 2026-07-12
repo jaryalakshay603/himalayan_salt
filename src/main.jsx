@@ -21,7 +21,7 @@ const PRODUCT = {
   name: "Himachali Green Salt",
   packSizes: [
     { id: "200g", label: "200 gram", price: 120, mrp: 150 },
-    { id: "500g", label: "500 gram", price: 220, mrp: 200 }
+    { id: "500g", label: "500 gram", price: 220, mrp: 250 }
   ],
   rating: "4.9",
   deliveryFee: 60,
@@ -221,7 +221,7 @@ function App() {
           </p>
           <ul className="check-list">
             <li><Check size={18} /> Traditional green salt seasoning</li>
-            <li><Check size={18} /> Choose 200 gram, 500 gram, or 1 kg packs</li>
+            <li><Check size={18} /> Choose 200 gram, 500 gram packs</li>
             <li><Check size={18} /> Cash-on-delivery friendly order flow</li>
           </ul>
         </div>
