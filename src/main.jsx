@@ -221,7 +221,7 @@ function App() {
           </p>
           <ul className="check-list">
             <li><Check size={18} /> Traditional green salt seasoning</li>
-            <li><Check size={18} /> Choose 200 gram, 500 gram packs</li>
+            <li><Check size={18} /> Choose 200 gram, or 500 gram packs</li>
             <li><Check size={18} /> Cash-on-delivery friendly order flow</li>
           </ul>
         </div>
