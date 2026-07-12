@@ -8,3 +8,6 @@ dist/
 
 # Netlify local state
 .netlify/
+
+# Local dev server logs
+vite-dev*.log

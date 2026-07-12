@@ -3,15 +3,16 @@ import { createRoot } from "react-dom/client";
 import {
   Check,
   ChevronRight,
+  ExternalLink,
   IndianRupee,
   Instagram,
   MessageCircle,
   Minus,
-  PackageCheck,
   Plus,
   ShieldCheck,
   ShoppingBag,
   Sparkles,
+  Star,
   Truck,
 } from "lucide-react";
 import "./styles.css";
@@ -33,6 +34,7 @@ const STORE_CONTACT = {
   whatsappNumber: "918559023422",
   displayPhone: "+91 85590 23422",
   instagramUrl: "https://www.instagram.com/p/DaBH0oHhrGC/?igsh=MTlsbTY0bXBjNWVmYw==",
+  googleReviewUrl: "https://share.google/6ShH46KBfrRcFVr2f",
 };
 
 const initialCheckout = {
@@ -169,6 +171,7 @@ function App() {
         <nav aria-label="Primary navigation">
           <a href="#product">Product</a>
           <a href="#benefits">Benefits</a>
+          <a href="#reviews">Reviews</a>
           <a href="#checkout">Order</a>
         </nav>
         <a className="cart-pill" href="#checkout">
@@ -192,6 +195,15 @@ function App() {
             </a>
             <a className="secondary-button" href="#product">View details</a>
             <a
+              className="secondary-button review-button"
+              href={STORE_CONTACT.googleReviewUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Star size={18} />
+              Review us
+            </a>
+            <a
               className="secondary-button"
               href={STORE_CONTACT.instagramUrl}
               target="_blank"
@@ -207,7 +219,7 @@ function App() {
       <section className="trust-strip" aria-label="Store highlights">
         <Feature icon={<Truck />} title="Fast dispatch" text="Orders prepared within 24 hours." />
         <Feature icon={<ShieldCheck />} title="Food grade" text="Clean packed and kitchen ready." />
-        <Feature icon={<PackageCheck />} title="Single product" text="Simple stock, focused quality." />
+        <Feature icon={<Star />} title={`${PRODUCT.rating} rated`} text="Share your Google review after tasting." />
       </section>
 
       <section className="product-section" id="product">
@@ -256,6 +268,41 @@ function App() {
           <Benefit title="Herbal character" text="A green seasoned blend that stands out on the table and in jars." />
           <Benefit title="Simple ordering" text="Customers fill one checkout form and you receive the order." />
           <Benefit title="Ready to grow" text="Add more pack sizes, coupons, payments, or delivery zones later." />
+        </div>
+      </section>
+
+      <section className="review-section" id="reviews">
+        <div className="review-copy">
+          <p className="eyebrow">Customer reviews</p>
+          <h2>Tried the salt? Tell others how it tasted.</h2>
+          <p>
+            Your Google review helps new customers order with confidence and
+            helps this small Himachali salt store grow.
+          </p>
+        </div>
+
+        <div className="review-panel" aria-label="Google review options">
+          <div className="stars" aria-label={`${PRODUCT.rating} out of 5 customer rating`}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star key={star} size={23} fill="currentColor" />
+            ))}
+          </div>
+          <strong>{PRODUCT.rating} customer rating</strong>
+          <p>Open Google, choose your stars, and add a quick note about taste, packing, or delivery.</p>
+          <div className="review-prompts">
+            <span>Fresh packing</span>
+            <span>Good taste</span>
+            <span>Fast delivery</span>
+          </div>
+          <a
+            className="primary-button full"
+            href={STORE_CONTACT.googleReviewUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Write a Google review
+            <ExternalLink size={18} />
+          </a>
         </div>
       </section>
 
@@ -355,7 +402,8 @@ function App() {
         <span>Himachali Salt Store</span>
         <span>
           <a href={`https://wa.me/${STORE_CONTACT.whatsappNumber}`}>{STORE_CONTACT.displayPhone}</a> |{" "}
-          <a href={STORE_CONTACT.instagramUrl} target="_blank" rel="noreferrer">Instagram</a>
+          <a href={STORE_CONTACT.instagramUrl} target="_blank" rel="noreferrer">Instagram</a> |{" "}
+          <a href={STORE_CONTACT.googleReviewUrl} target="_blank" rel="noreferrer">Google review</a>
         </span>
       </footer>
     </main>

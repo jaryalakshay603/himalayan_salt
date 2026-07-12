@@ -203,6 +203,10 @@ p {
   border: 1px solid rgba(32, 48, 41, 0.12);
 }
 
+.review-button {
+  color: #8a5a00;
+}
+
 .full {
   width: 100%;
 }
@@ -210,6 +214,7 @@ p {
 .trust-strip,
 .product-section,
 .benefits,
+.review-section,
 .checkout-section {
   padding: clamp(48px, 7vw, 96px) clamp(20px, 6vw, 86px);
 }
@@ -396,6 +401,68 @@ p {
   margin-bottom: 0;
 }
 
+.review-section {
+  align-items: center;
+  background: #f8f6f1;
+  display: grid;
+  gap: clamp(28px, 6vw, 72px);
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 430px);
+}
+
+.review-copy {
+  max-width: 700px;
+}
+
+.review-panel {
+  background: #203029;
+  border-radius: 8px;
+  color: white;
+  display: grid;
+  gap: 16px;
+  padding: 26px;
+  position: relative;
+}
+
+.review-panel p {
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 0.98rem;
+  margin-bottom: 0;
+}
+
+.stars {
+  color: #f2b84b;
+  display: flex;
+  gap: 4px;
+}
+
+.review-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.review-prompts span {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.86rem;
+  font-weight: 800;
+  padding: 8px 11px;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.review-prompts span:hover {
+  background: rgba(242, 184, 75, 0.16);
+  transform: translateY(-2px);
+}
+
+.review-panel .primary-button {
+  background: #f2b84b;
+  box-shadow: 0 12px 28px rgba(242, 184, 75, 0.18);
+  color: #203029;
+}
+
 .checkout-copy {
   max-width: 620px;
 }
@@ -532,6 +599,7 @@ footer a {
 
   .trust-strip,
   .product-section,
+  .review-section,
   .checkout-section,
   .benefit-grid {
     grid-template-columns: 1fr;
